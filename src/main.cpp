@@ -1,12 +1,22 @@
 #include <Arduino.h>
 
-HardwareSerial Serial_im920(1);
+HardwareSerial Serial_im920(2);
+
+hw_timer_t* timer;
+
 void setup()
 {
   Serial.begin(115200);
-	Serial_im920.begin(19200, SERIAL_8N1, 26, 27);
+	Serial_im920.begin(19200, SERIAL_8N1, 16, 17);
   
   Serial_im920.setTimeout(100);
+
+  timer = timerBegin(0, 80, true);
+  timerStart(timer);
+
+  delay(500);
+  Serial_im920.print("srst\r\n");
+  delay(500);
 }
 
 void loop()
@@ -29,5 +39,16 @@ void loop()
     Serial.readStringUntil('\n');
     Serial.println(str);
     Serial_im920.println(str);
+  }
+
+  // send data
+  if (timerReadMicros(timer) > 2e5) {
+    //from 0002
+    // Serial_im920.print("txdu,0001,a2\r\n");
+    //from 0003
+    Serial_im920.print("txdu,0001,a3\r\n");
+    Serial.println("sended message");
+
+    timerWrite(timer, 0);
   }
 }
