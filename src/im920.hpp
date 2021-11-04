@@ -16,31 +16,31 @@ namespace IM920s {
         bool   ACK_enable       = true;       // ACK enable sending in unicast
 
 
-    }
+    };
 
-    enum commands{
-        send_broadcast       = "txda" const,
-        send_broadcast_fixed = "txdt" const,
-        send_unicast         = "txdu" const,
-        send_back            = "txsb" const,
-        set_node_number      = "stnn" const,
-        get_node_number      = "rdnn" const,
-        set_group_number     = "stgn" const,
-        get_group_number     = "rdgn" const,
-        set_network_channel  = "stch" const,
-        get_network_channel  = "rdch" const,
-        set_sending_power    = "stpo" const,
-        get_sending_power    = "rdpo" const,
-        set_network_mode     = "stnm" const,
-        get_network_mode     = "rdnm" const,
-        set_maximum_hops     = "sttl" const,
-        get_maximum_hops     = "rttl" const,
-        set_rssi_threshold   = "stth" const,
-        get_rssi_threshold   = "rdth" const,
-        set_ACK_enable       = "enak" const,
-        set_ACK_disable      = "dsak" const,
-        reset             = "srst" const,
-    }
+    const enum commands{
+        send_broadcast,
+        send_broadcast_fixed,
+        send_unicast,
+        send_back,
+        set_node_number,
+        get_node_number,
+        set_group_number,
+        get_group_number,
+        set_network_channel,
+        get_network_channel,
+        set_sending_power,
+        get_sending_power,
+        set_network_mode,
+        get_network_mode,
+        set_maximum_hops,
+        get_maximum_hops,
+        set_rssi_threshold,
+        get_rssi_threshold,
+        set_ACK_enable,
+        set_ACK_disable,
+        reset,
+    };
 
     class IM920s
     {
@@ -82,3 +82,26 @@ namespace IM920s {
         
     };
 }
+/*
+= "txda"
+= "txdt"
+= "txdu"
+= "txsb"
+= "stnn"
+= "rdnn"
+= "stgn"
+= "rdgn"
+= "stch"
+= "rdch"
+= "stpo"
+= "rdpo"
+= "stnm"
+= "rdnm"
+= "sttl"
+= "rttl"
+= "stth"
+= "rdth"
+= "enak"
+= "dsak"
+= "srst"
+*/
