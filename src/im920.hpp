@@ -1,14 +1,21 @@
 #pragma onece
 
+#include <iostream>
+#include <experimental/optional>
+#include <string>
+
 #include <Arduino.h>
 
-namespace IM920s {
+using std::experimental::fundamentals_v1::experimental::optional;
+using std::experimental::fundamentals_v1::experimental::nullopt;
+
+namespace IM920 {
 
     struct configs {
-        uint16_t node_number    = null;       // Node number 0x0001 ~ 0xFFEF
-        uint32_t group_nomber   = null;       // Group number read only
-        uint32_t unique_id      = null;       // Unique ID read only
-        uint8_t network_channel = null;       // Network channel 01 ~ 29
+        std::optional<uint16_t> node_number    = std::nulloptopt;       // Node number 0x0001 ~ 0xFFEF
+        std::optional<uint32_t> group_nomber   = std::nulloptopt;       // Group number read only
+        std::optional<uint32_t> unique_id      = std::nulloptopt;       // Unique ID read only
+        std::optional<uint8_t> network_channel = std::nulloptopt;       // Network channel 01 ~ 29
         uint8_t sending_power   = 2;          // Sending power 1 : 1.1 mW 2 : 10mW
         uint8_t network_mode    = 1;          // Network mode 1 : simple multihop 2 : tree 3 : mesh
         uint8_t maximum_hops    = 10;         // Maximum hops 01 ~ 10
@@ -46,20 +53,30 @@ namespace IM920s {
     {
         private:
             HardwareSerial* _serial;            // Serial port connected to IM920s
-            unsigned long _serial_baude_rate;   // Serial port baud rate
-            uint8_t _busy_pin;                  // Pin connected to IM920s busy pin
-            uint8_t _reset_pin;                 // Pin connected to IM920s reset pin
-            IM920s::configs _configs;           // IM920s configs
+            unsigned long _serial_baud_rate;   // Serial port baud rate
+            std::optional<uint8_t> _busy_pin;                  // Pin connected to IM920s busy pin
+            std::optional<uint8_t> _reset_pin;                 // Pin connected to IM920s reset pin
+            IM920::configs _configs;           // IM920s configs
+            String _get_command(IM920::commands command);
+            //read from IM920s
+            void _update_configs();
+            void _update_node_number();
+            void _update_group_number();
+            void _update_network_channel();
+            void _update_sending_power();
+            void _update_network_mode();
+            void _update_maximum_hops();
+            void _update_rssi_threshold();
         public:
-            IM920s(HardwareSerial* serial, unsigned long serial_baud_rate = 19200, uint8_t busy_pin = null, uint8_t reset_pin = null);
-            IM920s(HardwareSerial* serial, unsigned long serial_baud_rate = 19200, uint8_t busy_pin = null, uint8_t reset_pin = null, im920::configs configs);
+            IM920s(HardwareSerial* serial, unsigned long serial_baud_rate = 19200, std::optional<uint8_t> _busy_pin = std::nullopt, std::optional<uint8_t> reset_pin = std::nullopt);
+            IM920s(HardwareSerial* serial, unsigned long serial_baud_rate = 19200, std::optional<uint8_t> _busy_pin = std::nullopt, std::optional<uint8_t> reset_pin = std::nullopt, im920::configs configs);
             ~IM920s();
             void reset();
             void send_broadcast(uint8_t* data, uint8_t length);
             void send_unicast(uint8_t* data, uint8_t length, uint8_t address);
             void send_back(uint8_t* data, uint8_t length, uint8_t address);
             //setters
-            void set_configs(IM920s::configs configs);
+            void set_configs(IM920::configs configs);
             void set_configs(uint16_t node_number, uint8_t network_channel, uint8_t sending_power, uint8_t network_mode, uint8_t maximum_hops, uint8_t rssi_threshold, bool ACK_enable);
             void set_node_number(uint16_t node_number);
             void set_network_channel(uint8_t network_channel);
