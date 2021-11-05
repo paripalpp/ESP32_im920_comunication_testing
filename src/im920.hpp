@@ -1,13 +1,11 @@
 #pragma onece
 
 #include <iostream>
-#include <experimental/optional>
+#include <optional>
 #include <string>
 
 #include <Arduino.h>
 
-using std::experimental::fundamentals_v1::experimental::optional;
-using std::experimental::fundamentals_v1::experimental::nullopt;
 
 namespace IM920 {
 
@@ -25,7 +23,7 @@ namespace IM920 {
 
     };
 
-    const enum commands{
+    enum commands{
         send_broadcast,
         send_broadcast_fixed,
         send_unicast,

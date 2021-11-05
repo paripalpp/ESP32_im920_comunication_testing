@@ -14,7 +14,7 @@ IM920s::IM920s(HardwareSerial* serial, unsigned long serial_baud_rate, std::opti
     this->_serial->begin(this->_serial_baud_rate);
     this->_serial->setTimeout(10);
     this->reset();
-    this->update_configs();
+    this->_update_configs();
 }
 
 IM920s::IM920s(HardwareSerial* serial, unsigned long serial_baud_rate, std::optional<uint8_t> busy_pin, std::optional<uint8_t> reset_pin, Im920::configs configs)
@@ -27,7 +27,7 @@ IM920s::IM920s(HardwareSerial* serial, unsigned long serial_baud_rate, std::opti
     this->_serial->begin(this->_serial_baud_rate);
     this->_serial->setTimeout(10);
     this->reset();
-    this->update_configs(configs);
+    this->_update_configs(configs);
     this->set_configs(configs);
 }
 
@@ -36,7 +36,7 @@ IM920s::~IM920s()
     IM920s::_serial->end();
 }
 
-IM920s::get_command(commands command)
+IM920s::_get_command(commands command)
 {
     match(command,
         [](commands::send_broadcast)        {return "txda"},
@@ -74,14 +74,14 @@ IM920s::reset()
             delay(10);
         },
         [](std::nullopt_t) {
-            this->_serial->println(this->get_command(IM920::commands::reset));
+            this->_serial->println(this->_get_command(IM920::commands::reset));
             delay(10);
         });
 }
 
 IM920s::send_broadcast(uint8_t* data, uint8_t len)
 {
-    IM920s::_serial->print(this->get_command(IM920::commands::send_broadcast));
+    IM920s::_serial->print(this->_get_command(IM920::commands::send_broadcast));
     for (uint8_t i = 0; i < len; i++)
     {
         IM920s::_serial->print(",");
@@ -92,7 +92,7 @@ IM920s::send_broadcast(uint8_t* data, uint8_t len)
 
 IM920s::send_unicast(uint8_t* data, uint8_t len, uint8_t address)
 {
-    IM920s::_serial->print(this->get_command(IM920::commands::send_unicast));
+    IM920s::_serial->print(this->_get_command(IM920::commands::send_unicast));
     IM920s::_serial->print(address, HEX);
     for (uint8_t i = 0; i < len; i++)
     {
