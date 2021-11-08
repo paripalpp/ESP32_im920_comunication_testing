@@ -1,5 +1,7 @@
 #include <Arduino.h>
 
+#include "im920.hpp"
+
 #define sending_rate_us 250e3
 
 #define nn0003

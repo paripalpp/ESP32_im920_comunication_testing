@@ -4,7 +4,7 @@
 
 using namespace IM920;
 
-IM920s::IM920s(HardwareSerial* serial, unsigned long serial_baud_rate, std::optional<uint8_t> busy_pin, std::optional<uint8_t> reset_pin)
+IM920s::IM920s(HardwareSerial* serial, unsigned long serial_baud_rate, uint8_t busy_pin, uint8_t reset_pin, configs configs)
 {
     this->_serial = serial;
     this->_serial_baud_rate = serial_baud_rate;
@@ -15,19 +15,6 @@ IM920s::IM920s(HardwareSerial* serial, unsigned long serial_baud_rate, std::opti
     this->_serial->setTimeout(10);
     this->reset();
     this->_update_configs();
-}
-
-IM920s::IM920s(HardwareSerial* serial, unsigned long serial_baud_rate, std::optional<uint8_t> busy_pin, std::optional<uint8_t> reset_pin, Im920::configs configs)
-{
-    this->_serial = serial;
-    this->_serial_baud_rate = serial_baud_rate;
-    this->_busy_pin = busy_pin;
-    this->_reset_pin = reset_pin;
-
-    this->_serial->begin(this->_serial_baud_rate);
-    this->_serial->setTimeout(10);
-    this->reset();
-    this->_update_configs(configs);
     this->set_configs(configs);
 }
 
@@ -36,50 +23,51 @@ IM920s::~IM920s()
     IM920s::_serial->end();
 }
 
-IM920s::_get_command(commands command)
+String IM920s::_get_command(commands command)
 {
-    match(command,
-        [](commands::send_broadcast)        {return "txda"},
-        [](commands::send_broadcast_fixed)  {return "txdt"},
-        [](commands::send_unicast)          {return "txdu"},
-        [](commands::send_back)             {return "txsb"},
-        [](commands::set_node_number)       {return "stnn"},
-        [](commands::get_node_number)       {return "rdnn"},
-        [](commands::set_group_number)      {return "stgn"},
-        [](commands::get_group_number)      {return "rdgn"},
-        [](commands::set_network_channel)   {return "stch"},
-        [](commands::get_network_channel)   {return "rdch"},
-        [](commands::set_sending_power)     {return "stpo"},
-        [](commands::get_sending_power)     {return "rdpo"},
-        [](commands::set_network_mode)      {return "stnm"},
-        [](commands::get_network_mode)      {return "rdnm"},
-        [](commands::set_maximum_hops)      {return "sttl"},
-        [](commands::get_maximum_hops)      {return "rttl"},
-        [](commands::set_rssi_threshold)    {return "stth"},
-        [](commands::get_rssi_threshold)    {return "rdth"},
-        [](commands::set_ACK_disable)       {return "enak"},
-        [](commands::set_ACK_disable)       {return "dsak"},
-        [](commands::reset)             {return "srst"}
-        )
+    switch (command)
+    {
+        case commands::send_broadcast:        return String("txda");
+        case commands::send_broadcast_fixed:  return String("txdt");
+        case commands::send_unicast:          return String("txdu");
+        case commands::send_back:             return String("txsb");
+        case commands::set_node_number:       return String("stnn");
+        case commands::get_node_number:       return String("rdnn");
+        case commands::set_group_number:      return String("stgn");
+        case commands::get_group_number:      return String("rdgn");
+        case commands::set_network_channel:   return String("stch");
+        case commands::get_network_channel:   return String("rdch");
+        case commands::set_sending_power:     return String("stpo");
+        case commands::get_sending_power:     return String("rdpo");
+        case commands::set_network_mode:      return String("stnm");
+        case commands::get_network_mode:      return String("rdnm");
+        case commands::set_maximum_hops:      return String("sttl");
+        case commands::get_maximum_hops:      return String("rttl");
+        case commands::set_rssi_threshold:    return String("stth");
+        case commands::get_rssi_threshold:    return String("rdth");
+        case commands::set_ACK_enable:       return String("enak");
+        case commands::set_ACK_disable:       return String("dsak");
+        case commands::reset:                 return String("srst");
+        default:                              return String("");
+    }
 }
 
-IM920s::reset()
+void IM920s::reset()
 {
-    match(this->_reset_pin,
-        [](uint8_t pin) {
-            pinMode(pin, OUTPUT);
-            digitalWrite(pin, LOW);
-            delay(10);
-            digitalWrite(pin, HIGH);
-            delay(10);
-        },
-        [](std::nullopt_t) {
-            this->_serial->println(this->_get_command(IM920::commands::reset));
-            delay(10);
-        });
+    switch (this->_reset_pin)
+    {
+        case 255:
+            IM920s::_serial->print(this->_get_command(commands::reset));
+            break;
+        default:
+            digitalWrite(this->_reset_pin, LOW);
+            delay(100);
+            digitalWrite(this->_reset_pin, HIGH);
+            break;
+    }
 }
 
-IM920s::send_broadcast(uint8_t* data, uint8_t len)
+void IM920s::send_broadcast(uint8_t* data, uint8_t len)
 {
     IM920s::_serial->print(this->_get_command(IM920::commands::send_broadcast));
     for (uint8_t i = 0; i < len; i++)
@@ -90,7 +78,7 @@ IM920s::send_broadcast(uint8_t* data, uint8_t len)
     IM920s::_serial->print("\r\n");
 }
 
-IM920s::send_unicast(uint8_t* data, uint8_t len, uint8_t address)
+void IM920s::send_unicast(uint8_t* data, uint8_t len, uint8_t address)
 {
     IM920s::_serial->print(this->_get_command(IM920::commands::send_unicast));
     IM920s::_serial->print(address, HEX);
@@ -102,13 +90,13 @@ IM920s::send_unicast(uint8_t* data, uint8_t len, uint8_t address)
     IM920s::_serial->print("\r\n");
 }
 
-IM920s::send_back(uint8_t* data, uint8_t len, uint8_t address)
+void IM920s::send_back(uint8_t* data, uint8_t len, uint8_t address)
 {
     IM920s::_serial->print("txsb ");
     IM920s::_serial->print(address, HEX);
     for (uint8_t i = 0; i < len; i++)
     {
-        IM920s::_serial->print(" ");
+        IM920s::_serial->print(",");
         IM920s::_serial->print(data[i], HEX);
     }
     IM920s::_serial->print("\r\n");
